@@ -81,7 +81,9 @@ func (u *UserServer) Create(ctx context.Context, request *userpb.UserCreateReque
 	return &resp, nil
 }
 
-// toGrpcError converts an error to grpc.Status compatible
+// toGrpcError converts an error to a grpc.Status compatible error
+// All errors returned by gRPC servers are expected to be of type grpc.Status
+// See here for details: https://godoc.org/google.golang.org/grpc/status
 func toGrpcError(err error) error {
 	ierr, ok := err.(errors.IError)
 	if !ok {
@@ -97,10 +99,13 @@ func toGrpcError(err error) error {
 	}
 
 	grpcStatus := status.New(codes.Internal, err.Error())
-	richErr, detailErr := grpcStatus.WithDetails(protoErr.ToErrorProto())
+
+	// Convert the error to a Proto message and attach it to Status
+	// This error proto message can be access on the client for rich details.
+	richStatus, detailErr := grpcStatus.WithDetails(protoErr.ToProto())
 	if detailErr != nil {
 		return grpcStatus.Err()
 	}
 
-	return richErr.Err()
+	return richStatus.Err()
 }

@@ -3,6 +3,7 @@ package errors;
 
 option go_package = "errors/errors";
 
+// Error defines a rich error message that a gRPC can respond with.
 message Error {
     // For non-production flows, the Internal message can be
     // defined for better debugging.
