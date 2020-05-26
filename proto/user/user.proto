@@ -1,5 +1,7 @@
 syntax = "proto3";
-package userapi;
+package user;
+
+option go_package = "proto/user";
 
 import "google/api/annotations.proto";
 
@@ -7,13 +9,13 @@ import "google/api/annotations.proto";
 service UserService {
     // Get a user
     rpc Get (UserGetRequest) returns (UserResponse) {
-        option (google.api.http).get = "/get";
+        option (google.api.http).get = "/users/{id}";
     }
 
     // Create a new user
     rpc Create (UserCreateRequest) returns (UserResponse) {
         option (google.api.http) = {
-            post: "/post"
+            post: "/users"
             body: "*"
         };
     }

@@ -19,6 +19,18 @@ go install \
 2. `go run server/gateway/main.go`
 3. `go run client/main.go`
 
+## Proto files and compiling
+
+To generate server code:
+```shell
+protoc -I. -I./proto --go_out=plugins=grpc,paths=source_relative:./proto_generated proto/user/user.proto
+```
+
+To generate grpc-gateway code:
+```shell
+protoc -I. -I./proto/. --grpc-gateway_out=logtostderr=true,paths=source_relative:./proto_generated proto/user/user.proto
+```
+
 
 ## Examples
 
