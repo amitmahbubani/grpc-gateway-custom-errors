@@ -1,0 +1,35 @@
+syntax = "proto3";
+package userapi;
+
+import "google/api/annotations.proto";
+
+// Defines a user RPC service, with REST annotations
+service UserService {
+    // Get a user
+    rpc Get (UserGetRequest) returns (UserResponse) {
+        option (google.api.http).get = "/get";
+    }
+
+    // Create a new user
+    rpc Create (UserCreateRequest) returns (UserResponse) {
+        option (google.api.http) = {
+            post: "/post"
+            body: "*"
+        };
+    }
+}
+
+message UserCreateRequest {
+    string name = 1;
+    int32 age = 2;
+}
+
+message UserGetRequest {
+    string id = 1;
+}
+
+message UserResponse {
+    string id = 1;
+    string name = 2;
+    int32 age = 3;
+}
