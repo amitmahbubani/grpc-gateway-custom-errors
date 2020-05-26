@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 
+	"github.com/amitmahbubani/grpc-gateway-custom/errors"
 	usergw "github.com/amitmahbubani/grpc-gateway-custom/proto_generated/proto/user"
 )
 
@@ -21,6 +24,7 @@ func main() {
 	defer cancel()
 
 	mux := runtime.NewServeMux()
+	runtime.GlobalHTTPErrorHandler = CustomErrorHandler
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
 	err := usergw.RegisterUserServiceHandlerFromEndpoint(ctx, mux, grpcServerAddress, opts)
@@ -33,5 +37,29 @@ func main() {
 	err = http.ListenAndServe(gatewayAddress, mux)
 	if err != nil {
 		log.Fatalf("failed to start grpc-gateway server: %v", err)
+	}
+}
+
+func CustomErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
+	const fallback = `{"error": "failed to marshal error message"}`
+
+	w.Header().Set("Content-type", marshaler.ContentType())
+	w.WriteHeader(runtime.HTTPStatusFromCode(status.Code(err)))
+
+	var jsonErr interface{}
+
+	s := status.Convert(err)
+	for _, d := range s.Details() {
+		switch info := d.(type) {
+		case *errors.Error:
+			jsonErr = info
+		default:
+			jsonErr = `{"error": "` + s.Err().Error() + `"}`
+		}
+	}
+
+	jErr := json.NewEncoder(w).Encode(jsonErr)
+	if jErr != nil {
+		w.Write([]byte(fallback))
 	}
 }
