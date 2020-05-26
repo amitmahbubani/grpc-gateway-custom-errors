@@ -1,0 +1,33 @@
+syntax = "proto3";
+package errors;
+
+option go_package = "errors/errors";
+
+message Error {
+    // For non-production flows, the Internal message can be
+    // defined for better debugging.
+    message Internal {
+        // trace_id, request_id etc
+        string request_id = 1;
+
+        // internal error code
+        string code = 2;
+
+        // Reserved for future cases
+        reserved 3 to 5;
+    }
+
+    Internal internal = 1;
+
+    // public error code
+    string code = 2;
+
+    // description of the error, in text
+    string message = 3;
+
+    // Request field that caused the error
+    string field = 4;
+
+    // Reserved for future cases
+    reserved 5 to 15;
+}
