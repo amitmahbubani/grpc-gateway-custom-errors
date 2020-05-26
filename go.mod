@@ -1,4 +1,4 @@
-module github.com/amitmahbubani/grpc-gateway-custom
+module github.com/amitmahbubani/grpc-gateway-custom-errors
 
 go 1.13
 

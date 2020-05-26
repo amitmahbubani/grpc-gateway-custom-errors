@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
-	"github.com/amitmahbubani/grpc-gateway-custom/errors"
-	usergw "github.com/amitmahbubani/grpc-gateway-custom/proto_generated/proto/user"
+	"github.com/amitmahbubani/grpc-gateway-custom-errors/errors"
+	usergw "github.com/amitmahbubani/grpc-gateway-custom-errors/proto_generated/proto/user"
 )
 
 var grpcServerAddress = "127.0.0.1:8050"

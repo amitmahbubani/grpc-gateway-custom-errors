@@ -1,4 +1,4 @@
-# grpc-gateway-custom
+# grpc-gateway-custom-errors
 
 This repo contains sample code that demonstrates some of the customization capabilities in [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
 
