@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
+	"github.com/amitmahbubani/grpc-gateway-custom/errors"
 	userpb "github.com/amitmahbubani/grpc-gateway-custom/proto_generated/proto/user"
 )
 
@@ -43,8 +44,8 @@ type UserServer struct{}
 func (u *UserServer) Get(ctx context.Context, request *userpb.UserGetRequest) (*userpb.UserResponse, error) {
 	// To illustrate an error response, we're failing if len(id)>5
 	if len(request.GetId()) > 5 {
-		err := status.Error(codes.InvalidArgument, "validation error: id should be less than 5 chars")
-		return nil, err
+		err := &errors.AppError{Code: "validation_failure", Message: "id should be less than 5 chars", Field: "id"}
+		return nil, toGrpcError(err)
 	}
 
 	resp := userpb.UserResponse{
@@ -59,8 +60,8 @@ func (u *UserServer) Get(ctx context.Context, request *userpb.UserGetRequest) (*
 func (u *UserServer) Create(ctx context.Context, request *userpb.UserCreateRequest) (*userpb.UserResponse, error) {
 	// To illustrate an error response, we're failing if age < 0
 	if request.Age < 0 {
-		err := status.Error(codes.InvalidArgument, "validation error: age must be a positive integer")
-		return nil, err
+		err := &errors.AppError{Code: "validation_failure", Message: "validation error: age must be a positive integer", Field: "age"}
+		return nil, toGrpcError(err)
 	}
 
 	resp := userpb.UserResponse{
@@ -70,4 +71,24 @@ func (u *UserServer) Create(ctx context.Context, request *userpb.UserCreateReque
 	}
 
 	return &resp, nil
+}
+
+func toGrpcError(err error) error {
+	ierr, ok := err.(errors.IError)
+	if !ok {
+		return status.Error(codes.Unknown, err.Error())
+	}
+
+	protoErr, ok := ierr.(errors.ProtoConstructable)
+	if !ok {
+		return status.Error(codes.Internal, err.Error())
+	}
+
+	grpcStatus := status.New(codes.Internal, err.Error())
+	richErr, detailErr := grpcStatus.WithDetails(protoErr.ToErrorProto())
+	if detailErr != nil {
+		return grpcStatus.Err()
+	}
+
+	return richErr.Err()
 }

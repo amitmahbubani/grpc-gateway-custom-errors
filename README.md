@@ -31,6 +31,10 @@ To generate grpc-gateway code:
 protoc -I. -I./proto/. --grpc-gateway_out=logtostderr=true,paths=source_relative:./proto_generated proto/user/user.proto
 ```
 
+error proto:
+```shell
+protoc -I. --go_out=plugins=grpc,paths=source_relative:./  errors/error.proto
+```
 
 ## Examples
 
