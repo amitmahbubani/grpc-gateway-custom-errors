@@ -46,20 +46,17 @@ func CustomErrorHandler(ctx context.Context, mux *runtime.ServeMux, marshaler ru
 	w.Header().Set("Content-type", marshaler.ContentType())
 	w.WriteHeader(runtime.HTTPStatusFromCode(status.Code(err)))
 
-	var jsonErr interface{}
-
 	s := status.Convert(err)
 	for _, d := range s.Details() {
 		switch info := d.(type) {
 		case *errors.Error:
-			jsonErr = info
-		default:
-			jsonErr = `{"error": "` + s.Err().Error() + `"}`
+			jErr := json.NewEncoder(w).Encode(info)
+			if jErr != nil {
+				w.Write([]byte(fallback))
+			}
+			return
 		}
 	}
 
-	jErr := json.NewEncoder(w).Encode(jsonErr)
-	if jErr != nil {
-		w.Write([]byte(fallback))
-	}
+	runtime.DefaultHTTPError(ctx, mux, marshaler, w, nil, err)
 }
